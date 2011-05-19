@@ -5,6 +5,8 @@ The point of COB_ISSD (Image Sequence Section Deleter) is to aid in the
 deletion of portions (or all) of a selected image sequence directly from within
 After Effects.
 
+Author: Collin D Brooks <collin.brooks@gmail.com>
+
 Why would I use it?
 ===================
 
@@ -78,9 +80,3 @@ Warranty
 Unless required by applicable law or agreed to in writing, this software is
 distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. 
-
-Running Scripts In After Effects
-================================
-
-See the manual for your current version of After Effects for instructions on
-loading scripts.
