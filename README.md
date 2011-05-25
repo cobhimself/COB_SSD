@@ -1,7 +1,7 @@
-COB_ISSD V. 1.1
+COB_SSD V. 1.2
 ===============
 
-The point of COB_ISSD (Image Sequence Section Deleter) is to aid in the
+The point of COB_SSD (Sequence Section Deleter) is to aid in the
 deletion of portions (or all) of a selected image sequence directly from within
 After Effects.
 

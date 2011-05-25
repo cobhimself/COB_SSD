@@ -1,7 +1,7 @@
-COB ISSD v1.1 INSTALL
+COB SSD v1.2 INSTALL
 =====================
 
-To use the COB ISSD v1.1 script, please read the information below.
+To use the COB SSD v1.2 script, please read the information below.
 
 The After Effects Scripts Folder
 ================================
@@ -11,7 +11,7 @@ default, the Scripts folder is in the following location:
  * (Windows) Program Files\Adobe\Adobe After Effects {CS# HERE}\Support Files
  * (Mac OS) Applications/Adobe After Effects {CS# HERE}
 
-Copy COB_ISSD_v1.1.jsxbin
+Copy COB_SSD_v1.2.jsxbin
 =======================
 
 Because the COB ISSD script can be used as a dockable panel, it's best to copy
