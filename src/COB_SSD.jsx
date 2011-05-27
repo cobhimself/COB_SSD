@@ -716,7 +716,9 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
         NON_VALID_SEQUENCE: {en: "The selected file does not seem to be" +
                 " a part of a sequence."},
         NO_SEQUENCE_SET: {en: "You must select an image sequence to operate" +
-                " on in order to perform the deletion!"}
+                " on in order to perform the deletion!"},
+        AE_SEQ_SELECTED: {en: "For reasons that I'm sure are clear, " +
+                ".aep files cannot be selected!"}
     };
 
 
@@ -1133,14 +1135,24 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
 
             theFile = theFile.fullName;
             try {
-                //Slice the file path up and init the IS data.
-                that.IS.init(theFile);
-                //CHOP OFF NUMBERS AND EXTENSION
+                if (theFile.lastIndexOf(".aep") === -1) {
 
-                that.UI.updateISLocation(
-                    that.IS.getPath(),
-                    that.IS.getFileNameWithPounds()
-                );
+                    //Slice the file path up and init the IS data.
+                    that.IS.init(theFile);
+                    //CHOP OFF NUMBERS AND EXTENSION
+
+                    that.UI.updateISLocation(
+                        that.IS.getPath(),
+                        that.IS.getFileNameWithPounds()
+                    );
+
+                    //Clear the start and end fields since this is a new image
+                    //sequence.
+                    that.UI.setStartFrame("");
+                    that.UI.setEndFrame("");
+                } else {
+                    alert(localize(error.AE_SEQ_SELECTED));
+                }
             } catch (e) {
                 alert(e);
             }
