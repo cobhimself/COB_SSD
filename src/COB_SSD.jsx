@@ -1,5 +1,5 @@
 /**
- * @fileoverview An Image Sequence Section Destroyer script.
+ * @fileoverview An image sequence section destroyer script.
  *
  * The point of this application is to allow the user to easily and quickly
  * delete a selected sequence of files directly from After Effects. It is most
@@ -21,7 +21,7 @@
  * limitations under the License.
  *
  * @author Collin D Brooks <collin.brooks@gmail.com>
- * @version 0.1.0
+ * @version 1.0.0
  */
 
 /*jslint white: true, onevar: true, undef: true, newcap: true, nomen: true, 
@@ -309,7 +309,7 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
      * @type {String}
      * @fieldOf COB.ISSD
      */
-    this.version = "v0.1.0";
+    this.version = "v1.0.0";
 
     /**
      * The name of this script.
