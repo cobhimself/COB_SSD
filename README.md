@@ -62,7 +62,7 @@ Select an image sequence to work with:
    your render queue.
 
  * Get RQ Item Path - Click on "Get RQ Item" to select an output module to grab
-   the image sequence path from. If there is only one RQ item and it only ahs
+   the image sequence path from. If there is only one RQ item and it only has
    one output module, this output module is automatically selected without any
    futher input. Start and end frames of the output module are automatically
    entered in as the start and end frames to delete.

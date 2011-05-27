@@ -652,52 +652,54 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
         confirmDelete: {en: "Are you sure you want to delete the following?" +
             "\n\n%1"},
         help: {en: this.scriptName + " " + this.version + " Help\n\n" +
-            "The point of this application is to allow the user " +
-            "to easily and quickly delete a selected sequence of " +
-            "files directly from After Effects. It is most useful " +
-            "when having to delete only a section of an image sequence " +
-            "for re-render. Follow the steps below:\n\n" +
-            "1. Click on Browse and select any file from a file sequence" +
-            " (such as an Image Sequence). By doing this, you are " +
-            "telling the application what sequence of files it is " +
-            "working with.\n" +
-            "2. Define the boundaries of the section you want to delete " +
-            "by entering in the numbers of the first and last files " +
-            "in the sequence in the spaces provided.\n" +
-            "3. Review your input and then click on \"Perform Delete\". " +
-            "\n\nTool Descriptions:\n\n" +
-            "1. Get RQ Item Path: Allows you to select a render " +
-            "queue item and have the path that it is set to render " +
-            "to be used as the image sequence " +
-            "you are wanting to reference.\n" +
-            "2. Get Work Area: After making a composition an active " +
-            "item, this allows you to have the section begin " +
-            "and section end input fields " +
-            "set to the in and out time of the work area.\n" +
-            "3. Perform Test Only: Allows you to see the " +
-            "results of the opperation " +
-            "without actually deleting any files.\n" +
-            "\nImportant Info:\n\n" +
-            "-This application has some precautionary measures " +
-            "that prevent bad user input (such as characters " +
-            "instead of numbers, an ending number less than " +
-            "the beginning number, skipping files that don't " +
-            "exist, and selecting files " +
-            "from a different file sequence than the sequence " +
-            "given). However, the author of this application can " +
-            "in no way be held liable for any damage that this script " +
-            "may cause. Use at your own risk.\n" +
-            "-You are asked to verify that you really want " +
-            "to delete the sequence you've specified. Once you " +
-            "perform the delete, the files cannot be retrieved " +
-            "by easy means since the files do not go to the " +
-            "recycle bin. Use wisely.\n" +
-            "\nContact Information:\n\n" +
-            "Contact collin.brooks@gmail.com with " +
-            "comments/suggestions.\n" +
-            "**This script can be duplicated and distributed freely " +
-            "as long as this help text and contact information remain " +
-            "intact and coupled with this script."}
+        "The point of COB_SSD (Sequence Section Destroyer) is to aid in " +
+        "the deletion of portions (or all) of a selected image sequence " +
+        "directly from within After Effects.\n\n" +
+        "Select an image sequence to work with:\n" +
+        "--------------------------------------\n\n" +
+
+        " * Browse - Click on \"Browse\" to select a frame from an image " +
+            "sequence on your file system. Any frame from the image " +
+            "sequence will do! Alternatively, you can click on \"Get RQ " +
+            "Item\" to choose an image sequence file path from your " +
+            "render queue.\n\n" +
+
+        " * Get RQ Item Path - Click on \"Get RQ Item\" to select an output " +
+            "module to grab the image sequence path from. If there is only " +
+            "one RQ item and it only has one output module, this output " +
+            "module is automatically selected without any futher input. " +
+            "Start and end frames of the output module are automatically " +
+            "entered in as the start and end frames to delete.\n\n" +
+
+        " * Define the beginning and ending frame numbers for the section of" +
+            " the sequence that you want deleted. You can do this by manually" +
+            " entering in the frame numbers or by clicking on \"Get Work " +
+            "Area\" to automagically grab the in and out frame numbers of " +
+            "the workarea in the currently active composition.\n\n" +
+
+        "Define the frame range to delete:\n" +
+        "---------------------------------\n" +
+        " * Enter in a start and end frame for the range to delete. If " +
+            "you've used the \"Get RQ Item\" button, these are set as " +
+            "the frame range of the output module. You do not need to " +
+            "pad the frame numbers with zeroes.\n\n" +
+
+        "Nuke those suckers!\n" +
+        "-------------------\n" +
+        " * When you're ready, click on the \"Perform Delete\" button " +
+            "to begin deletion. Don't worry, a confirmation prompt will " +
+            "appear asking you if you are really sure you want to delete " +
+            "the sequence section.\n\n" +
+
+        " * Feeling a little bit insecure? That's ok, click on the " +
+            "\"Perform test only\" checkbox to indicate you want to " +
+            "perform a dry run and verify the files that you were " +
+            "wanting to delete will actually be deleted. When checked, no " +
+            "confirmation prompt is displayed since no deletion is " +
+            "performed.\n\n" +
+
+        "Done. Note: The developer is not responsible for the loss of " +
+        "coffee breaks normally used to wait out a sequence deletion."}
     };
 
     error = {
