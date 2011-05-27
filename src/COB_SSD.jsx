@@ -482,7 +482,8 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
         };
 
         this.getFileNameWithRange = function (start, end) {
-            return fileBeginning + "[" + start + "-" + end +"]" + fileEnd;
+            return path + fileBeginning +
+                "[" + start + "-" + end +"]" + fileEnd;
         };
 
         this.getFrameNum = function (n) {
