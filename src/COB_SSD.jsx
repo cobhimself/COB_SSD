@@ -28,7 +28,8 @@
 regexp: false, plusplus: true, bitwise: true, maxerr: 200, maxlen: 79, indent: 4 */                 
 
 /*global app, $, File, Folder, alert, prompt, clearOutput, writeLn, write,
-confirm, Window, Panel, localize*/
+confirm, Window, Panel, localize, unescape, TimecodeDisplayType,
+timeToCurrentFormat*/
 
 /**
  * The main COB namespace
@@ -248,8 +249,8 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
                 init = function (status) {
                     clearOutput();
                     writeLn(status);
-                    //Reset the current percentage to a value that it will never be
-                    //in the updateProgress function.
+                    //Reset the current percentage to a value that it will
+                    //never be in the updateProgress function.
                     currentPercentage = -1;
                 };
 
@@ -272,8 +273,8 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
             return {
                 /**
                  * Initializes the progress keeper.
-                 * @param {String} status A status string to use as the progress
-                 * header.
+                 * @param {String} status A status string to use as the
+                 * progress header.
                  * @param {String} title The title to use for the progress
                  * window if the current version of After Effects is greater
                  * than 8.
@@ -417,10 +418,10 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
                 digits,
                 results;
 
-                containsPounds = (fullFileName.lastIndexOf("#") !== -1);
+            containsPounds = (fullFileName.lastIndexOf("#") !== -1);
 
-                slicer = (!containsPounds) ? /(\d+)/g : /(#+)/g;
-                /*$.writeln(slicer);*/
+            slicer = (!containsPounds) ? /(\d+)/g : /(#+)/g;
+            /*$.writeln(slicer);*/
 
             if (slicer.test(fullFileName)) {
                 results = fullFileName.match(slicer);
@@ -437,13 +438,13 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
                 if (containsPounds) {
 
                     fileBeginning = fileBeginning.substr(
-                            0,
-                            fileBeginning.length - 1
+                        0,
+                        fileBeginning.length - 1
                     );
 
                     fileEnd = fileEnd.substr(
-                            1,
-                            fileEnd.length - 1
+                        1,
+                        fileEnd.length - 1
                     );
 
                 }
@@ -483,7 +484,7 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
 
         this.getFileNameWithRange = function (start, end) {
             return path + fileBeginning +
-                "[" + start + "-" + end +"]" + fileEnd;
+                "[" + start + "-" + end + "]" + fileEnd;
         };
 
         this.getFrameNum = function (n) {
@@ -586,7 +587,8 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
                     skippedInARow += 1;
                     progress += 1;
 
-                    if (AEVersion < 9 || skippedInARow === skipProgressThreshold) {
+                    if (AEVersion < 9 ||
+                            skippedInARow === skipProgressThreshold) {
                         progressKeeper.updateProgress(total, progress);
                         skippedInARow = 0;
                     }
@@ -1027,7 +1029,8 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
                 if (myOutputModNum > 0 &&
                         myOutputModNum <= numOutputModules &&
                         !isNaN(myOutputModNum)) {
-                    //Make sure the user entered a valid outputModule index number.
+                    //Make sure the user entered a valid outputModule index
+                    //number.
                     that.myOutputMod = that.myRQItem.outputModules[
                         parseInt(myOutputModNum, 10)
                     ];
@@ -1203,7 +1206,7 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
                 if (confirm(l(
                         lang.confirmDelete,
                         that.IS.getFileNameWithRange(startNum, endNum)
-                ))) {
+                    ))) {
                     doDelete = true;
                 }
             }
