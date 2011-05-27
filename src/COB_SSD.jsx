@@ -1,5 +1,5 @@
 /**
- * @fileoverview An Image Sequence Section Deleter script.
+ * @fileoverview An Image Sequence Section Destroyer script.
  *
  * The point of this application is to allow the user to easily and quickly
  * delete a selected sequence of files directly from After Effects. It is most
@@ -316,7 +316,7 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
      * @type {String}
      * @fieldOf COB.ISSD
      */
-    this.scriptName = "Image Sequence Section Deleter";
+    this.scriptName = "Image Sequence Section Destroyer";
 
     /**
      * The name of this scripts' author.
@@ -821,20 +821,17 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
                         "}," +
                         "buttonGroup: Group {" +
                             "orientation: 'row'," +
+                            "alignment: ['fill', 'fill']," +
                             "performDeleteButton: Button {" +
                                 "text: '" +
                                     l(lang.deleteButton) +
                                 "'" +
                             "}," +
                             "helpButton: Button {" +
+                                "alignment: ['right', 'fill']," +
                                 "text: '" + l(lang.helpButton) + "'" +
                             "}," +
                         "}," +
-                        "status: StaticText {" +
-                            "text: ''," +
-                            "orientation:'row'," +
-                            "alignment: ['fill', 'fill']" +
-                        "}" +
                     "}" +
                 "}";
 
