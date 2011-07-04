@@ -21,7 +21,7 @@
  * limitations under the License.
  *
  * @author Collin D Brooks <collin.brooks@gmail.com>
- * @version 1.0.0
+ * @version 1.0.1
  */
 
 /*jslint white: true, onevar: true, undef: true, newcap: true, nomen: true, 
@@ -80,7 +80,7 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
          * @type {Number}
          * @name COB.ISSD-AEVersion
          */
-        AEVersion = parseInt(app.version, 10),
+        AEVersion = parseFloat(app.version),
 
         /**
          * Language dictionary for localized strings.
@@ -309,7 +309,7 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
      * @type {String}
      * @fieldOf COB.ISSD
      */
-    this.version = "v1.0.0";
+    this.version = "v1.0.1";
 
     /**
      * The name of this script.
@@ -1044,7 +1044,14 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
     }
 
     function getRQItemPath() {
-        var theFile, displayType, timeSpanStart, timeSpanEnd, compFrameRate;
+        var theFile, displayType, timeSpanStart, timeSpanEnd, compFrameRate,
+            setStartAndEnd;
+
+        //There seems to be a bug or a change in the way TimecodeDisplayTimes
+        //are accessed in CS5.5. Therefore, until this can be sorted out, only
+        //enable the setting of the start and end frames if the version is not
+        //CS5.5
+        setStartAndEnd = (AEVersion === 10.5) ? false : true;
 
         if (getRQItem() !== false) {
             theFile = File.decode(that.myOutputMod.file.fsName);
@@ -1060,32 +1067,33 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
                         that.IS.getFileNameWithPounds()
                     );
 
-                    //Get the current timecode display type so we can switch to
-                    //frames, record the start and stop frame numbers and then
-                    //set the timecode display back to the original setting.
-                    displayType = app.project.timecodeDisplayType;
+                    if (setStartAndEnd) {
+                        //Get the current timecode display type so we can switch to
+                        //frames, record the start and stop frame numbers and then
+                        //set the timecode display back to the original setting.
+                        displayType = app.project.timecodeDisplayType;
 
-                    //Set the display type to frames
-                    app.project.timecodeDisplayType =
-                        TimecodeDisplayType.FRAMES;
-                    
-                    timeSpanStart = that.myRQItem.timeSpanStart;
-                    timeSpanEnd = timeSpanStart +
-                        that.myRQItem.timeSpanDuration;
-                    
-                    compFrameRate = that.myRQItem.comp.frameRate;
-                    
-                    //Set the start and end frames based upon the
-                    //start and end frames of the selected RQ item
-                    that.UI.setStartFrame(
-                        timeToCurrentFormat(timeSpanStart, compFrameRate)
-                    );
-                    that.UI.setEndFrame(
-                        timeToCurrentFormat(timeSpanEnd, compFrameRate) - 1
-                    );
-                    
-                    //Reset the display type to the original setting
-                    app.project.timecodeDisplayType = displayType;
+                        //Set the display type to frames
+                        app.project.timecodeDisplayType =
+                            TimecodeDisplayType.FRAMES;
+                        timeSpanStart = that.myRQItem.timeSpanStart;
+                        timeSpanEnd = timeSpanStart +
+                            that.myRQItem.timeSpanDuration;
+                        
+                        compFrameRate = that.myRQItem.comp.frameRate;
+                        
+                        //Set the start and end frames based upon the
+                        //start and end frames of the selected RQ item
+                        that.UI.setStartFrame(
+                            timeToCurrentFormat(timeSpanStart, compFrameRate)
+                        );
+                        that.UI.setEndFrame(
+                            timeToCurrentFormat(timeSpanEnd, compFrameRate) - 1
+                        );
+                        
+                        //Reset the display type to the original setting
+                        app.project.timecodeDisplayType = displayType;
+                    }
                 } catch (e) {
                     alert(e);
                 }
