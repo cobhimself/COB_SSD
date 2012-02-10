@@ -1,0 +1,234 @@
+/**
+ * @fileoverview This file defines the progressKeeper Object which keeps track
+ * of the progress of an action. It checks to see if the user is using a
+ * version of After Effects that supports the progress bar ScriptUI object and,
+ * if not, it outputs progress to the info panel.
+ * 
+ * Copyright 2011 Collin D Brooks <collin.brooks@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @author Collin D Brooks <collin.brooks@gmail.com>
+ * @version 2.0.0
+ */
+
+/**
+ * Keeps track of the progress made when deleting image sequences and
+ * defines different methods for displaying said progress depending on
+ * the version of After Effects currently being run.
+ * @private
+ * @inner
+ * @namespace
+ * @name COB.SSD-progressKeeper
+ */
+progressKeeper = (function () {
+    var winGfx, darkColorBrush, g, res, thePal,
+        l = localize, //Shorthand for localize
+
+        //For AE < 9
+        currentPercentage,
+
+        //Private Methods
+        /**
+         * Initializes the progressKeeper object.
+         * @param {String} status The status message to use in the progress
+         * bar.
+         * @param {String} title The title to use for the progress window.
+         * @private
+         * @returns Nothing.
+         */
+        init,
+
+        /**
+         * Updates the progress bar's value.
+         * @param {Number} total The total value amount to use as what 100%
+         * complete would be.
+         * @param {Number} progress The value that the action is currently at.
+         * @private
+         * @return Nothing.
+         */
+        updateProgress,
+
+        /**
+         * Resets the progress bar by setting its value to zero and making it
+         * visible.
+         * @private
+         * @returns Nothing.
+         */
+        resetProgress,
+
+        /**
+         * Sets the status text for the progress window.
+         * @param {String} s The string to be used as the status message.
+         * @private
+         * @returns Nothing.
+         */
+        setStatus,
+
+        /**
+         * Performs actions necessary when the progress bar has reached 100%.
+         * @param {String} m The message to present to the user.
+         * @private
+         * @returns Nothing.
+         */
+        end;
+
+    
+    // Because the progress bar was poorly implemented in CS3, if the
+    // user is currently running a version before CS4 (9.0), show the
+    // progress by updating the application info panel. To do this, the
+    // code below defines the following methods depending on the
+    // version of AE:
+    //     init
+    //     updateProgress
+    //     setStatus
+    //     end
+    
+    
+    //If the version of AE is greather than CS4
+    if (AEVersion >= 9) {
+
+        thePal = new Window("palette",
+                "Progress...",
+                undefined,
+                {resizeable: false}
+                );
+        if (thePal !== null) {
+            //UI RESOURCE SETUP
+            res = "group { orientation: 'column', margins:0," +
+                "alignment: ['fill','fill'], size: [350, 450]," +
+                "status: StaticText {" +
+                    "alignment: ['left', 'fill']," +
+                    "text: ''," +
+                    "size: [350, 25]," +
+                    "properties: {multiline: true}," +
+                "}," +
+                "progressBar: Progressbar {" +
+                    "size: [325, 20]" +
+                "}," +
+                "okButton: Button { text: 'Ok' }" +
+            "}";
+
+            g = thePal.add(res);
+            
+            thePal.layout.layout(true);
+
+            thePal.onResizing = thePal.onResize = function () {
+                this.layout.resize();
+            };
+
+            g.okButton.onClick = function () {
+                thePal.close();
+            };
+
+            // Workaround to ensure the edittext text color is black,
+            // even at darker UI brightness levels
+            winGfx = thePal.graphics;
+            darkColorBrush = winGfx.newPen(
+                winGfx.BrushType.SOLID_COLOR,
+                [0, 0, 0],
+                1
+            );
+
+        }
+
+        init = function (status, title) {
+            //Reset the progressbar value and set the title
+            resetProgress(0);
+            g.okButton.visible = false;
+            g.text = title;
+            g.status.text = status;
+
+            thePal.layout.layout(true);
+            thePal.center();
+            thePal.update();
+            thePal.show();
+        };
+
+        updateProgress = function (total, progress) {
+            g.progressBar.value = (progress / total) * 100;
+        };
+        
+        resetProgress = function () {
+            g.progressBar.value = 0;
+            g.progressBar.visible = true;
+        };
+
+        setStatus = function (s) {
+            g.status.text = s;
+        };
+
+        end = function (m) {
+            //Perform any UI update
+            setStatus(m);
+            g.progressBar.visible = false;
+            g.okButton.visible = true;
+            thePal.layout.layout(true);
+        };
+
+    } else {
+
+        init = function (status) {
+            clearOutput();
+            writeLn(status);
+            //Reset the current percentage to a value that it will
+            //never be in the updateProgress function.
+            currentPercentage = -1;
+        };
+
+        updateProgress = function (total, progress) {
+            var percentage = Math.round((progress / total) * 100);
+            if (percentage % 20 === 0 &&
+                    percentage !== currentPercentage) {
+                write(percentage + "% ");
+                currentPercentage = percentage;
+            }
+        };
+        
+        end = function (m) {
+            clearOutput();
+            alert(m);
+        };
+    }
+
+    /** @scope COB.SSD-progresskeeper */
+    return {
+        /**
+         * Initializes the progress keeper.
+         * @param {String} status A status string to use as the
+         * progress header.
+         * @param {String} title The title to use for the progress
+         * window if the current version of After Effects is greater
+         * than 8.
+         * @returns Nothing.
+         */
+        init: init,
+
+        /**
+         * Updates the current progress.
+         * @param {Number} total The total number of frames currently
+         * being deleted.
+         * @param {Number} progress The current frame being deleted.
+         * @returns Nothing.
+         */
+        updateProgress: updateProgress,
+
+        /**
+         * Ends the progress keeping and displays a message to the
+         * user.
+         * @param {String} m The message to display to the user.
+         * @returns Nothing.
+         */
+        end: end
+    };
+}());

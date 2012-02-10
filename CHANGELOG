@@ -1,12 +1,16 @@
 COB Sequence Selection Destoryer
 ================================
 
-1.0.0
+2.0.0
 
- - Initial release.
 
 1.0.1
 
  - Because of possible changes to the scripting API in CS5.5, the script does
  not automatically add the start and end frames when selecting a RQ Item if the
  user is using CS5.5. This will be fixed in a future release.
+
+1.0.0
+
+ - Initial release.
+

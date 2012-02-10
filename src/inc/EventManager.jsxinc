@@ -1,0 +1,74 @@
+/**
+ * @fileoverview This file defines the EventManager Object which keeps track of
+ * the different call back functions that are used by an object.
+ * 
+ * Copyright 2011 Collin D Brooks <collin.brooks@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @author Collin D Brooks <collin.brooks@gmail.com>
+ * @version 2.0.0
+ */
+
+/**
+ * Class that keeps track of events and fires them when called.
+ * @private
+ * @class
+ * @name COB.SSD-EventManager
+ */
+var EventManager = function () {
+    /* Event Listeners */
+    var events = [];
+
+    /**
+     * Adds an event to the tracked events and sets a function as a callback
+     * for that event.
+     * @param {String} e The event name to be used for this event.
+     * @param {Function} f The callback function to be used when this event is
+     * fired.
+     * @returns Nothing.
+     */
+    this.addEventListener = function (e, f) {
+        events[e] = function () {
+            f();
+        };
+    };
+
+    /**
+     * Removes an event from the tracked events.
+     * @param {String} e The name of the event to remove.
+     * @returns Nothing.
+     */
+    this.removeEventListener = function (e) {
+        events[e] = null;
+    };
+
+    /**
+     * Fires the callback function of the given event.
+     * @param {String} e The name of the event to fire.
+     * @returns {EventManager} This event manager object. Useful for chaining.
+     */
+    this.fire = function (e) {
+        return function () {
+            if (typeof events[e] === "function") {
+                outputLn('firing: ' + e);
+                events[e]();
+            } else {
+                outputLn("event doesn't exist: " + e);
+                return null;
+            }
+        };
+    };
+
+    return this;
+};

@@ -1,0 +1,658 @@
+/**
+ * @fileoverview This file contains the Sequence object for the COB_SSD script.
+ * It is defined as 'this.Sequence' because it is included within the COB.SSD
+ * object.
+ * 
+ * Copyright 2011 Collin D Brooks <collin.brooks@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @author Collin D Brooks <collin.brooks@gmail.com>
+ * @version 2.0.0
+ */
+ app.settings.saveSetting( "COB_SSD", "IS_LOCATIONS_LIST", "");
+/**
+ * The class containing all the information about the Image Sequence
+ * selected by the user.
+ * @name COB.SSD.Sequence
+ * @class
+ */
+this.Sequence = function () {
+    /* TODO:
+     * FOR VERSION 2: INSERT A WAY TO TRACK THE DIFFERENT JOBS PERFORMED ON
+     * THIS IMAGE SEQUENCE. THE JOB LIST WILL NEED TO BE CLEARED ON INIT()
+     */
+
+    var that = this,
+        fullName = "",
+        path = "",
+        fileBeginning = "",
+        fileEnd = "",
+        numDigits = 0,
+        //Does this IS have pounds in it? This affects how it is handled
+        containsPounds,
+
+        /* TODO:
+         * THE FOLLOWING ARRAYS SHOULD HOLD A LIST OF THE DELETED, SKIPPED,
+         * AND TEST-DELETED FRAMES
+         */
+
+        deleted = [],
+        skipped = [],
+        testDeleted = [],
+
+        /**
+         * A list of the user has selected.
+         *
+         * This list is used to populate the dropdown menu in the UI.
+         * @type String[]
+         */
+        sequenceList = [],
+        e = new EventManager();
+
+    outputLn("sequenceList.length ORIGINAL: " + sequenceList.length);
+    this.sequenceSet = false;
+
+    /**
+     * Reads the saved image sequence locations (if any) from the AE
+     * preferences file and sets the sequenceList array to its value.
+     * @returns Nothing.
+     */
+    function getSavedISLocations() {
+        var savedList = '';
+        outputLn("getSavedISLocations()...");
+
+        //Get saved IS_LOCATIONS_LIST from setting
+        if (app.settings.haveSetting("COB_SSD", "IS_LOCATIONS_LIST")) {
+            savedList = app.settings.getSetting("COB_SSD",
+                "IS_LOCATIONS_LIST");
+
+            outputLn("savedList: " + savedList);
+            if (savedList !== '') {
+                sequenceList = savedList.split(",");
+            } else {
+                sequenceList = [];
+            }
+        }
+
+        outputLn("sequenceList.length: " + sequenceList.length);
+
+        e.fire('onSequenceListUpdate')();
+        outputLn("... End getSavedISLocations()");
+    }
+
+    /**
+     * Saves the list of file paths to the app.settings file in order to keep
+     * the set of sequences persistent.
+     * @returns Nothing.
+     */
+    function saveISLocations() {
+        outputLn("setSavedISLocations()...");
+
+        /*app.settings.saveSetting( "COB_SSD", "IS_LOCATIONS_LIST", "");*/
+        outputLn("saving list: " + sequenceList.join(','));
+        if (sequenceList.length > 0) {
+            app.settings.saveSetting(
+                "COB_SSD",
+                "IS_LOCATIONS_LIST",
+                sequenceList.join(',')
+            );
+        }
+
+        outputLn("... End setSavedISLocations()");
+    }
+
+    /**
+     * Returns a string of pound signs (#) with a length of numDigits.
+     * @param {Number} numDigits The number of pound signs to return.
+     * @returns {String} A string of pound signs with a length of the given
+     * numDigits.
+     */
+    function getPoundDigits(numDigits) {
+        var poundString = '';
+        for (i = 0; i < numDigits; i += 1) {
+            poundString += "#";
+        }
+        return poundString;
+    }
+
+    /**
+     * Returns whether or not the sequence contains one or more pound signs
+     * within it. This is by no means an in-depth verification.
+     * @param {String} seq The sequence to search for pound signs.
+     * @returns {Bool} True if at least one pound sign is found, false if not.
+     */
+    function hasPoundSigns(seq) {
+        return (seq.lastIndexOf("#") !== -1);
+    }
+
+    /**
+     * Checks to see if the currently set image sequence path matches the given
+     * seqPath regardless of whether or not the sequence is written in
+     * pound-digit notation or in normal number-digit notation.
+     * @param {String} seqPath The image sequence path to check for a match.
+     * @example
+     * var seq = new COB.SSD.Sequence();
+     * seq.setSequence('~/myseq_[#####].png');
+     * alert(seq.matchesSeqStructure('~/myseq_00000.png'); //Alerts true.
+     * alert(seq.matchesSeqStructure('~/myseq_[#####].png'); //Alerts true.
+     * alert(seq.matchesSeqStructure('~/myseq_1_00000.png'); //Alerts false.
+     * @returns {Bool} True if the given seqPath matches the structure of the
+     * currently set sequence.
+     */
+    this.matchesSequenceStructure - function (seqPath) {
+        var seq;
+
+        //Does the seqPath contain pound signs?
+        if (hasPoundSigns(seqPath)) {
+            //The given seqPath contains pound signs; compare its path to the
+            //currently set path's pound-digit notation.
+            if (seqPath === this.getPathWithPounds()) {
+                return true;
+            }
+        } else {
+            //The given seqPath does not contain pound signs; split up the
+            //seqPath and compare key elements of the paths.
+            seq = splitSequence(seqPath);
+            if (seq.path === path &&
+                    seq.fileBeginning === fileBeginning &&
+                    seq.fileEnd === fileEnd &&
+                    seq.numDigits === numDigits) {
+                return true;
+
+        }
+
+        return false;
+    }
+
+    /**
+     * Initializes the Sequence singlton.
+     * @returns Nothing.
+     */
+    this.init = function () {
+        getSavedISLocations();
+        e.fire('onSequenceListUpdate')();
+    }
+
+    /**
+     * Adds the given file path to the list of previously selected sequences if
+     * it doesn't already exist within the sequenceList array. If the sequence
+     * does exist, it is moved to the top of the list.
+     * @param {String} filePath The file path string of this sequence.
+     * @param {String} currentFileSeq The file sequence that is currently
+     * selected. This is used to see if we need to do any searching/list
+     * reloading. If both the filePath and currentFileSeq files are the same,
+     * we'll keep the list the way it is and bypass the running of the
+     * onSequenceListUpdate event.
+     * @returns Nothing.
+     */
+    /*** TODO: Stopped here. Need the logic for the checking to make sense.
+     * ***/
+    this.setSequence = function (filePath) {
+        outputLn("Start Sequence.setSequence()");
+        /*outputLn("sequenceInList: " + this.sequenceInList(filePath));*/
+        var sequenceIndex,
+            maxLength = 10;
+        //Determine if the given filePath matches the currently set sequence.
+        if (this.matchesSeqStructure(filePath)) {
+            //Nothing needs to be done because the sequence matches
+            return;
+        }
+        //First see if the file contains pound signs so we can do a basic path
+        //comparison.
+        if (hasPoundSigns(filePath)) {
+            //Since the filePath has pound signs in it, see if its path matches
+            //with the currently set sequence's path with pounds. If so,
+            //nothing needs to be done. This happens when the user browses for
+            //the same image sequence that they currently have selected.
+            if (filepath === this.getPathWithPounds()) {
+                return;
+            }
+        } else {
+            //The filePath does not have pound signs in it so it must be an
+            //actual frame file from the sequence with the number digits still
+            //entact. Process the sequence and then 
+
+        }
+
+        if (filePath === this.getPathWithPounds()) {
+        } else {
+
+            //Set the data for the given filePath.
+            this.processSequence(filePath);
+
+            //Since the filePath has been processed above, set it to be the
+            //processed path. It now contains # signs where the digits are supposed
+            //to be.
+            filePath = this.getISFileString();
+
+            outputLn('filePath: ' + filePath);
+
+            sequenceIndex = this.sequenceInList(filePath);
+
+            outputLn("sequenceList Before: " + sequenceList.join(','));
+            outputLn("sequenceList.length Before: " + sequenceList.length);
+            //Does this sequence already exist within the list?
+            if (sequenceIndex !== null){
+                outputLn("Sequence exists, moving to top.");
+                sequenceList.unshift(sequenceList.splice(sequenceIndex,1)[0]);
+            } else {
+                outputLn("Sequence doesn't exist, adding.");
+                sequenceList.unshift(filePath);
+
+                //Make sure the sequence list does not grow greater than the
+                //maxLength.
+                if (sequenceList.length > maxLength) {
+                    outputLn("Trimming sequenceList length.");
+                    sequenceList.pop();
+                }
+            }
+
+            outputLn("sequenceList After: " + sequenceList.join(','));
+            outputLn("sequenceList.length: " + sequenceList.length);
+            outputLn("sequenceList[0]: " + sequenceList[0]);
+            //process the first filePath in the list
+
+            //Save the list of sequences
+            saveISLocations();
+            e.fire('onSequenceListUpdate')();
+        }
+        outputLn("End Sequence.setSequence()");
+    }
+
+    /**
+     * Splits the given filePath into its different parts and returns an object
+     * representing the split parts.
+     * @param {String} filePath The file path to the sequence.
+     * @returns {Object} An object with the following key/value pairs:
+     *    - digits: digits portion of the sequence.
+     *    - numDigits: the number of digits within this sequence.
+     *    - fileBeginning: the beginning portion of the sequence name before
+     *    the digits portion.
+     *    - fileEnd: the ending portion of the sequence name after the digits
+     *    portion.
+     *    - fullName: the full name of the given filePath (including dir path).
+     *    - path: the directory portion of the sequence's file path.
+     *    - containsPounds: whether or not the given filePath had pound signs
+     *    in it.
+     *    - endSlash: the index of the last directory slash delimiter.
+     */
+    function splitSequence(filePath) {
+        var seq = {},
+            lastNumGroup,
+            slicer,
+            results = [];
+
+        seq.endSlash = filePath.lastIndexOf(osSlash);
+        seq.ISPath = filePath.substring(0, seq.endSlash + 1);
+        seq.fullFileName = filePath.substring(
+            seq.ISPath.length,
+            filePath.length
+        );
+
+        //Check to see if the file path sent to us has already had the
+        //digits replaced with #. This can happen if the file path is
+        //sent from the source of an output module and it is an Image
+        //Sequence
+        seq.containsPounds = hasPoundSigns();
+
+        outputLn("seq.containsPounds: " + seq.containsPounds);
+
+        slicer = (!seq.containsPounds) ? /(\d+)/g : /(#+)/g;
+        /*$.writeln(slicer);*/
+
+        if (slicer.test(seq.fullFileName)) {
+            results = seq.fullFileName.match(slicer);
+
+            seq.digits = results[results.length - 1];
+            seq.numDigits = seq.digits.length;
+            lastNumGroup = seq.fullFileName.lastIndexOf(seq.digits);
+            seq.fileBeginning = seq.fullFileName.substring(0, lastNumGroup);
+
+            seq.fileEnd = seq.fullFileName.substring(
+                lastNumGroup +
+                seq.digits.length,
+                seq.fullFileName.length
+            );
+
+            //If the file had pounds signs in it, get rid of the brackets
+            if (seq.containsPounds) {
+
+                seq.fileBeginning = seq.fileBeginning.substr(
+                    0,
+                    fileBeginning.length - 1
+                );
+
+                seq.fileEnd = seq.fileEnd.substr(
+                    1,
+                    seq.fileEnd.length - 1
+                );
+
+            }
+
+            return seq;
+    }
+
+    /**
+     * Processes the sequence by slicing the selected file into its
+     * different parts (i.e. path, fileName, fileBeginning, etc.).
+     * @param {String} filePath The file system path to use as the
+     * sequence's source.
+     * @returns None.
+     * @throws error.NON_VALID_SEQUENCE
+     */
+    this.processSequence  = function (filePath) {
+        outputLn("Start Sequence.processSequence()");
+
+            var seq = splitSequence(filePath);
+
+            fullName = seq.filePath;
+            path = seq.path;
+
+            this.sequenceSet = true;
+
+            outputLn("Sequence Set");
+            //Fire the onProcessSequence Event
+            e.fire('onProcessSequence')();
+        } else {
+            throw new Error(localize(error.NON_VALID_SEQUENCE));
+        }
+        outputLn("End Sequence.processSequence()");
+    };
+
+    /**
+     * Checks to see if the given file path is within the sequenceList array.
+     * @param {String} filePath The file path string to check for existence.
+     * @returns {Null|Int} Returns the index of the sequence if found or false
+     * if the sequence does not exist.
+     */
+    this.sequenceInList = function (filePath) {
+        outputLn("Start Sequence.sequenceInList()");
+        outputLn("filePath: " + filePath);
+        outputLn("sequenceList: " + sequenceList.toSource());
+
+        var i, max = sequenceList.length;
+
+        for (i = 0; i < max; i += 1) {
+
+            outputLn("sequenceInList[" + i + "]: " + sequenceList[i]);
+
+            if (sequenceList[i] === filePath){
+                outputLn("Returning " + i);
+                return i;
+            }
+        }
+        outputLn("Returning null");
+        return null;
+    }
+
+    /**
+     * Returns a string version of the sequences.
+     * TODO: Needs to be updated to allow for the sequenceList array.
+     * @returns {String} A string version of the sequences stored within this
+     * object.
+     */
+    this.toString = function () {
+        if (this.sequenceSet) {
+            var me = "";
+
+            me += "fullName: " + fullName + "\n";
+            me += "path: " + path + "\n";
+            me += "fileBeginning: " + fileBeginning + "\n";
+            me += "numDigits " + numDigits + "\n";
+            me += "fileEnd: " + fileEnd + "\n";
+
+            return me;
+        } else {
+            return undefined;
+        }
+    };
+
+    /**
+     * Returns the path of the stored sequence.
+     * @return {String|undefined} The path of this sequence or undefined if the sequence
+     * has not been set.
+     */
+    this.getPath = function () {
+        if (this.sequenceSet) {
+            return path;
+        } else {
+            return undefined;
+        }
+    };
+
+    /**
+     * Returns the Image Sequence's file string (including its directory path).
+     * If frameNumber is not provided, pound signs where the digits would
+     * normally be located will be returned.
+     * @param {Number} [frameNumber] Optional frame number to place within the IS
+     * file string. If not provided, pound signs with the correct amount of
+     * digits will be used.
+     * @returns {String} The file string for the Image Sequence.
+     */
+    this.getISFileString = function (frameNumber) {
+        var toReturn;
+        outputLn("getISFileString()");
+        if (this.sequenceSet) {
+            if (frameNumber !== undefined) {
+                toReturn = path +
+                    fileBeginning +
+                    this.getFrameNum(frameNumber) +
+                    fileEnd;
+            } else {
+                toReturn = path +
+                    fileBeginning +
+                    getPoundDigits(numDigits) +
+                    fileEnd;
+            }
+
+            outputLn("returning: " + toReturn);
+            return toReturn;
+        } else {
+            throw new Error(localize(error.SEQUENCE_NOT_SET, 'getISFileString'));
+        }
+    };
+
+    /**
+     * Returns the sequenceList array.
+     * @returns {Array} A list of sequences the user has previously selected.
+     */
+    this.getSequenceList = function () {
+        return sequenceList;
+    }
+
+    /**
+     * Returns the path of the currently set sequence with pound signs where
+     * the sequence digits would normally be.
+     * @returns {String} The file path of the currently set sequence with pound
+     * signs where the sequence digits would normally be.
+     */
+    this.getPathWithPounds = function () {
+        if (this.sequenceSet) {
+            var poundString = "",
+                i;
+
+            poundString += "[";
+
+            poundString += getPoundDigits(numDigits);
+
+            poundString += "]";
+
+            return fileBeginning +
+                poundString +
+                fileEnd;
+        } else {
+            throw new Error(localize(error.SEQUENCE_NOT_SET,
+                'getPathWithPounds'));
+        }
+    };
+
+    /**
+     *
+     * Returns the path of the currently set sequence with a frame range where
+     * the sequence digits would normally be.
+     * @param {Number} start The start frame of the range.
+     * @param {Number} end The end frame of the range.
+     * @returns {String} The path of the currently set sequence with a frame
+     * range where the sequence digits would normally be.
+     * @throws error.SEQUENCE_NOT_SET
+     */
+    this.getPathWithRange = function (start, end) {
+        if (this.sequenceSet) {
+            return path + fileBeginning +
+                "[" + start + "-" + end + "]" + fileEnd;
+        } else {
+            throw new Error(localize(error.SEQUENCE_NOT_SET,
+                'getPathWithRange'));
+        }
+    };
+
+    /**
+     * Returns a number padded with zeroes so that the number has the same
+     * amount of digits as the currently set sequence does.
+     * @param {Number} n The frame number to pad.
+     * @returns {String} The number padded with the correct amount of zeroes.
+     */
+    this.getFrameNum = function (n) {
+        if (this.sequenceSet) {
+            var numString = String(n),
+                numLength = numString.length,
+                i = 0,
+                numZeros = numDigits - numLength,
+                addZeros = "";
+
+            while (i < numZeros) {
+                addZeros = addZeros + "0";
+                i += 1;
+            }
+            return addZeros + numString;
+        } else {
+            throw new Error(localize(error.SEQUENCE_NOT_SET,
+                'getFrameNum'));
+        }
+    };
+
+    /**
+     * Deletes files from this image sequence based upon the start and end
+     * frame numbers sent and if testOnly is false or undefined.
+     * @param {Number} start The start frame number of the section of the
+     * sequence to delete. This does not need leading zeroes added to fit
+     * the number of digits in the sequence name; this is done
+     * automatically.
+     * @param {Number} end The end frame number of the section of the sequence
+     * to delete. This does not need leading zeroes added to fit the number
+     * of digits in the sequence name; this is done automatically.
+     * @param {Bool} [testOnly] Whether or not to actually delete the files
+     * belonging to the defined section of the sequence. Defaults to false.
+     * @returns {Array} An array with the number of files deleted as the 0
+     * index and the number of files skipped in the 1 index.
+     */
+    this.deleteSequenceSection = function (start, end, testOnly) {
+        if (this.sequenceSet) {
+            var i = start,
+                currentFileString,
+                currentFile,
+                isTest = testOnly || false,
+                filesDeleted = 0,
+                filesSkipped = 0,
+                skippedInARow = 0,
+                skipProgressThreshold = 5000,
+                currentStatus,
+                currentTitle,
+                total = end - start + 1,
+                progress = 0,
+                alertText = "",
+                l = localize;
+
+            //Initialize the progress keeper
+            if (isTest) {
+                currentTitle = l(lang.simProgressTitle);
+                currentStatus = l(lang.simProgressStatus);
+            } else {
+                currentTitle = l(lang.progressTitle);
+                currentStatus = l(lang.progressStatus);
+            }
+
+            currentStatus += start + " - " + end;
+
+            progressKeeper.init(currentStatus, currentTitle);
+
+            //Go through the start and end frames and delete them if this is
+            //not a test.
+            for (i; i <= end; i += 1) {
+                currentFileString = this.getISFileString(i);
+                currentFile = new File(currentFileString);
+
+                if (currentFile.exists) {
+
+                    //Remove this file if this is not a test.
+                    if (!isTest) {
+                        currentFile.remove();
+                    }
+
+                    filesDeleted += 1;
+                    progress += 1;
+
+                    //Reset the file skipped in a row
+                    skippedInARow = 0;
+
+                    //Update the progress
+                    progressKeeper.updateProgress(total, progress);
+                } else {
+                    filesSkipped += 1;
+                    skippedInARow += 1;
+                    progress += 1;
+
+                    if (AEVersion < 9 ||
+                            skippedInARow === skipProgressThreshold) {
+                        progressKeeper.updateProgress(total, progress);
+                        skippedInARow = 0;
+                    }
+                }
+
+            }
+
+            if (testOnly) {
+                alertText = localize(lang.wouldHaveDeleted,
+                        filesDeleted,
+                        filesSkipped);
+            } else {
+                alertText = localize(lang.deleted,
+                        filesDeleted,
+                        filesSkipped);
+            }
+
+            progressKeeper.end(alertText);
+
+            return true;
+        } else {
+            throw new Error(localize(error.SEQUENCE_NOT_SET,
+                'deleteSequenceSection'));
+        }
+    };
+
+    /**
+     * Sets the list of sequences the user has previously selected.
+     * @param {String[]} An array of file path strings.
+     * @returns Nothing.
+     */
+    this.setSequenceList = function (sequences) {
+        sequenceList = sequences;
+    }
+
+    //Event handling
+    this.addEventListener = e.addEventListener;
+    this.removeEventListener = e.removeEventListener;
+
+     return this;
+ };
