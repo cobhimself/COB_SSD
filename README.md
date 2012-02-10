@@ -1,4 +1,4 @@
-COB Sequence Section Destroyer v2.0.0
+COB Sequence Section Destroyer v1.0.1
 ===============
 
 The point of COB_SSD (Sequence Section Destroyer) is to aid in the
