@@ -25,7 +25,7 @@
  */
 
 /*jslint white: true, onevar: true, undef: true, newcap: true, nomen: true, 
-regexp: false, plusplus: true, bitwise: true, maxerr: 200, maxlen: 79, indent: 4 */                 
+regexp: false, plusplus: true, bitwise: true, maxerr: 200, maxlen: 79, indent: 4 */
 
 /*global app, $, File, Folder, alert, prompt, clearOutput, writeLn, write,
 confirm, Window, Panel, localize, unescape, TimecodeDisplayType,
@@ -151,7 +151,7 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
                 setStatus,
                 end;
 
-            
+
             // Because the progress bar was poorly implemented in CS3, if the
             // user is currently running a version before CS4 (9.0), show the
             // progress by updating the application info panel. To do this, the
@@ -161,8 +161,8 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
             //     updateProgress
             //     setStatus
             //     end
-            
-            
+
+
             //If the version of AE is greather than CS4
             if (AEVersion >= 9) {
 
@@ -188,7 +188,7 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
                     "}";
 
                     g = thePal.add(res);
-                    
+
                     thePal.layout.layout(true);
 
                     thePal.onResizing = thePal.onResize = function () {
@@ -226,7 +226,7 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
                 updateProgress = function (total, progress) {
                     g.progressBar.value = (progress / total) * 100;
                 };
-                
+
                 resetProgress = function () {
                     g.progressBar.value = 0;
                     g.progressBar.visible = true;
@@ -262,7 +262,7 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
                         currentPercentage = percentage;
                     }
                 };
-                
+
                 end = function (m) {
                     clearOutput();
                     alert(m);
@@ -360,7 +360,7 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
      * @fieldOf COB.ISSD
      * @type {OutputModule}
      */
-    this.myOutputMod = null; 
+    this.myOutputMod = null;
 
     /**
      * The class containing all the information about the Image Sequence
@@ -408,7 +408,7 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
                     ISPath.length,
                     filePath.length
                 ),
-                
+
                 //Check to see if the file path sent to us has already had the
                 //digits replaced with #. This can happen if the file path is
                 //sent from the source of an output module and it is an Image
@@ -566,20 +566,20 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
             for (i; i <= end; i += 1) {
                 currentFileString = this.getISFileString(i);
                 currentFile = new File(currentFileString);
-                
+
                 if (currentFile.exists) {
 
                     //Remove this file if this is not a test.
                     if (!isTest) {
                         currentFile.remove();
                     }
-                    
+
                     filesDeleted += 1;
                     progress += 1;
 
                     //Reset the file skipped in a row
                     skippedInARow = 0;
-                    
+
                     //Update the progress
                     progressKeeper.updateProgress(total, progress);
                 } else {
@@ -593,7 +593,7 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
                         skippedInARow = 0;
                     }
                 }
-                
+
             }
 
             if (testOnly) {
@@ -838,7 +838,7 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
                 "}";
 
             g = thePal.add(res);
-            
+
             thePal.layout.layout(true);
 
             thePal.onResizing = thePal.onResize = function () {
@@ -856,14 +856,14 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
                 [0, 0, 0],
                 1
             );
-            
+
             /*g.browsePanel.ISLocation.graphics.*/
                     /*foregroundColor = darkColorBrush;*/
             /*g.one.sectionSelectionPanel.row1.sectionBegin.*/
                     /*graphics.foregroundColor = darkColorBrush;*/
             /*g.one.sectionSelectionPanel.row2.sectionEnd.*/
                     /*graphics.foregroundColor = darkColorBrush;*/
-                    
+
         }
         //Assign events to fire
         g.browsePanel.browseButton.onClick = e.fire("onBrowse");
@@ -885,7 +885,7 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
                 } else {
                     thePal.layout.layout(true);
                 }
-            },                                                            
+            },
             addEventListener: e.addEventListener,
             removeEventListener: e.removeEventListener,
             setISLocation: function (t) {
@@ -925,7 +925,7 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
     this.init = function () {
         this.UI.show();
     };
-     
+
 
 // Private Methods:
 //----------------------------------------------------------------------------
@@ -1010,7 +1010,7 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
         } else {
             //Determine the render queue item based upon the number entered
             that.myRQItem = app.project.renderQueue.item(myRQItemNum);
-            
+
             numOutputModules = that.myRQItem.numOutputModules;
 
             if (numOutputModules !== 1) {
@@ -1020,7 +1020,7 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
             } else {
                 myOutputModNum = 1;
             }
-            
+
             if (myOutputModNum === null || myOutputModNum === "") {
                 //The user cancelled the promp
                 return false;
@@ -1044,18 +1044,21 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
     }
 
     function getRQItemPath() {
-        var theFile, displayType, timeSpanStart, timeSpanEnd, compFrameRate,
-            setStartAndEnd;
+        var theFile,
+            displayType,
+            timeSpanStart,
+            timeSpanEnd,
+            compFrameRate,
+            isAECS55,
+            projTimecodeDisplayType,
+            TimecodeDisplayTypeEnum;
 
-        //There seems to be a bug or a change in the way TimecodeDisplayTimes
-        //are accessed in CS5.5. Therefore, until this can be sorted out, only
-        //enable the setting of the start and end frames if the version is not
-        //CS5.5
-        setStartAndEnd = (AEVersion === 10.5) ? false : true;
+        isAECS55 = (AEVersion === 10.5) ? true : false;
+
 
         if (getRQItem() !== false) {
             theFile = File.decode(that.myOutputMod.file.fsName);
-            
+
             if (theFile !== null && theFile.lastIndexOf("#") !== -1) {
 
                 try {
@@ -1067,33 +1070,39 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
                         that.IS.getFileNameWithPounds()
                     );
 
-                    if (setStartAndEnd) {
-                        //Get the current timecode display type so we can switch to
-                        //frames, record the start and stop frame numbers and then
-                        //set the timecode display back to the original setting.
-                        displayType = app.project.timecodeDisplayType;
-
-                        //Set the display type to frames
-                        app.project.timecodeDisplayType =
-                            TimecodeDisplayType.FRAMES;
-                        timeSpanStart = that.myRQItem.timeSpanStart;
-                        timeSpanEnd = timeSpanStart +
-                            that.myRQItem.timeSpanDuration;
-                        
-                        compFrameRate = that.myRQItem.comp.frameRate;
-                        
-                        //Set the start and end frames based upon the
-                        //start and end frames of the selected RQ item
-                        that.UI.setStartFrame(
-                            timeToCurrentFormat(timeSpanStart, compFrameRate)
-                        );
-                        that.UI.setEndFrame(
-                            timeToCurrentFormat(timeSpanEnd, compFrameRate) - 1
-                        );
-                        
-                        //Reset the display type to the original setting
-                        app.project.timecodeDisplayType = displayType;
+                    if (!isAECS55) {
+                        projTimecodeDisplayType = app.project.timecodeDisplayType;
+                        TimecodeDisplayTypeEnum = TimecodeDisplayType;
+                    } else {
+                        projTimecodeDisplayType = app.project.timeDisplayType;
+                        TimecodeDisplayTypeEnum = TimeDisplayType;
                     }
+
+                    //Get the current timecode display type so we can switch to
+                    //frames, record the start and stop frame numbers and then
+                    //set the timecode display back to the original setting.
+                    displayType = projTimecodeDisplayType;
+
+                    //Set the display type to frames
+                    projTimecodeDisplayType = TimecodeDisplayTypeEnum.FRAMES;
+                    timeSpanStart = that.myRQItem.timeSpanStart;
+                    timeSpanEnd = timeSpanStart +
+                        that.myRQItem.timeSpanDuration;
+
+                    compFrameRate = that.myRQItem.comp.frameRate;
+
+                    //Set the start and end frames based upon the
+                    //start and end frames of the selected RQ item
+                    that.UI.setStartFrame(
+                        timeToCurrentFormat(timeSpanStart, compFrameRate)
+                    );
+                    that.UI.setEndFrame(
+                        timeToCurrentFormat(timeSpanEnd, compFrameRate) - 1
+                    );
+
+                    //Reset the display type to the original setting
+                    projTimecodeDisplayType = displayType;
+
                 } catch (e) {
                     alert(e);
                 }
@@ -1114,14 +1123,14 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
             frameDur,
             start,
             end;
-        
+
         if (activeComp === null) {
             alert(localize(error.NO_ACTIVE_COMP));
         } else {
             frameDur = activeComp.frameDuration;
             start = activeComp.workAreaStart;
             end = activeComp.workAreaDuration;
-            
+
             that.UI.setStartFrame(Math.floor(start / frameDur));
             that.UI.setEndFrame(
                 Math.floor(
@@ -1140,7 +1149,7 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
         var theFile;
 
         theFile = browse(localize(lang.selectIS));
-        
+
         if (theFile !== null && theFile !== false) {
 
             theFile = theFile.fullName;
@@ -1187,7 +1196,7 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
             alert(l(error.FRAMES_NAN));
             return false;
         }
-        
+
         return true;
     }
 
@@ -1218,12 +1227,12 @@ COB.ISSD = COB.ISSD || (function ISSD(globalObj) {
                 }
             }
         }
-        
+
         if (doDelete) {
             //Perform the deletion
             that.IS.deleteSequenceSection(startNum, endNum, testOnly);
         }
-        
+
     }
 
 // Main:
