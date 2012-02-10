@@ -1,0 +1,256 @@
+/**
+ * @fileoverview This file contains the UI object for the COB_SSD script. It is
+ * defined as 'this.UI' because it is included within the COB.SSD object.
+ * 
+ * Copyright 2011 Collin D Brooks <collin.brooks@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @author Collin D Brooks <collin.brooks@gmail.com>
+ * @version 2.0.0
+ */
+
+/**
+ * The UI of the COB.SSD script.
+ * @fieldOf COB.SSD
+ */
+this.UI = (function showUI() {
+    var winGfx,
+        darkColorBrush,
+        g, //Local pointer to thePal.grp
+        res,
+        l = localize, //Shorthand for localize
+        /* UI */
+        thePal = (globalObj instanceof Panel) ?
+            globalObj :
+            new Window("palette",
+                that.scriptName + " " + that.version,
+                undefined,
+                {resizeable: false}
+                ),
+        /* Event Listeners */
+        e = new EventManager();
+
+
+    if (thePal !== null) {
+        //UI RESOURCE SETUP
+        res =
+            "group {orientation: 'column', margins:-8, " +
+                "browsePanel: Panel {" +
+                    "text: '" + l(lang.browsePanelTitle) + "'," +
+                    "orientation: 'row'," +
+                    "alignment: ['fill','fill']," +
+                    "alignChildren: ['fill', 'bottom']," +
+                    "margins:10," +
+                    "ISLocation: DropDownList {" +
+                        "size: [220,20]," +
+                        "text: '" + l(lang.defaultISLocText) + "'" +
+                    "}," +
+                    "browseButton: Button {" +
+                        "text: '" + l(lang.browseButton) + "'," +
+                    "}" +
+                "}," +
+                "one: Group {" +
+                    "orientation: 'row'," +
+                    "alignment: ['fill', 'fill']," +
+                    "toolsPanel: Panel {" +
+                        "text: '" + l(lang.toolsPanel) + "'," +
+                        "orientation:'column'," +
+                        "getRQItemPathButton: Button {" +
+                            "text: '" + l(lang.getRQItem) + "'," +
+                            "alignment: ['fill','fill']" +
+                        "}" +
+                        "getWorkAreaButton: Button {" +
+                            "text: '" + l(lang.getWorkArea) + "'," +
+                            "alignment: ['fill', 'fill']" +
+                        "}" +
+                    "}," +
+                    "sectionSelectionPanel: Panel {" +
+                        "text: '" + l(lang.sectionSelPanel) + "'," +
+                        "orientation: 'column'," +
+                        "alignment: ['fill','fill']," +
+                        "row1: Group {" +
+                            "orientation:'row'," +
+                            "alignment: ['fill','fill']," +
+                            "sectionBeginStaticText: StaticText {" +
+                                "text: '" +
+                                    l(lang.sectionBegin) +
+                                    "'," +
+                                "alignment: ['right', 'middle']" +
+                            "}," +
+                            "sectionBegin: EditText {" +
+                                "size: [50,20]," +
+                                "alignment: ['right', 'middle']" +
+                            "}," +
+                        "}," +
+                        "row2: Group {" +
+                            "orientation: 'row'," +
+                            "alignment: ['fill','fill']," +
+                            "sectionEndStaticText: StaticText {" +
+                                "text: '" +
+                                    l(lang.sectionEnd) +
+                                "'," +
+                                "alignment: ['right', 'middle']}," +
+                            "sectionEnd: EditText {" +
+                                "size:[50,20]," +
+                                "alignment: ['right', 'middle']" +
+                            "}" +
+                        "}" +
+                    "}" +
+                "}," +
+                "two: Group {" +
+                    "orientation:'row'," +
+                    "alignment: ['fill','fill']," +
+                    "testOnlyCheckbox: Checkbox {" +
+                        "text: '" + l(lang.performTest) + "'" +
+                    "}," +
+                    "buttonGroup: Group {" +
+                        "orientation: 'row'," +
+                        "alignment: ['fill', 'fill']," +
+                        "performDeleteButton: Button {" +
+                            "text: '" +
+                                l(lang.deleteButton) +
+                            "'" +
+                        "}," +
+                        "helpButton: Button {" +
+                            "alignment: ['right', 'fill']," +
+                            "text: '" + l(lang.helpButton) + "'" +
+                        "}," +
+                    "}," +
+                "}" +
+            "}";
+
+        g = thePal.add(res);
+        
+        /**
+         * Sets the ISLocation DropDownList items to be the values of the
+         * passed array.
+         * @param {Array} locations An array of image sequence locations to set
+         * as the values of the ISLocation DropDownList.
+         * @returns Nothing.
+         */
+        function setISLocationsList(locations) {
+            outputLn("setISLocationsList()...");
+            var i,
+                locationList = g.browsePanel.ISLocation,
+                max = locations.length,
+                addedItem;
+
+            outputLn("Locations: " + locations.join(","));
+            outputLn("Locations.length: " + max);
+            
+            //Remove all of the items in the list.
+            locationList.removeAll();
+
+            for (i = 0; i < max; i += 1) {
+                outputLn("Adding item " + i + ": " + locations[i]);
+                locationList.add("item", locations[i]);
+            }
+
+            //Select the first drop down item
+            if (max > 0) {
+                locationList.selection = locationList.items[0];
+            }
+
+            outputLn("... End setISLocationsList()");
+        }
+
+        thePal.layout.layout(true);
+
+        thePal.onResizing = thePal.onResize = function () {
+            this.layout.resize();
+        };
+
+        //g.progressBar.visible = false;
+        //g.status.visible = false;
+
+        // Workaround to ensure the edittext text color is black,
+        // even at darker UI brightness levels
+        winGfx = thePal.graphics;
+        darkColorBrush = winGfx.newPen(
+            winGfx.BrushType.SOLID_COLOR,
+            [0, 0, 0],
+            1
+        );
+        
+        /*g.browsePanel.ISLocation.graphics.*/
+                /*foregroundColor = darkColorBrush;*/
+        /*g.one.sectionSelectionPanel.row1.sectionBegin.*/
+                /*graphics.foregroundColor = darkColorBrush;*/
+        /*g.one.sectionSelectionPanel.row2.sectionEnd.*/
+                /*graphics.foregroundColor = darkColorBrush;*/
+                
+    }
+    
+    //Assign events to fire
+    g.browsePanel.browseButton.onClick = e.fire("onBrowse");
+
+    g.one.toolsPanel.getRQItemPathButton.onClick =
+        e.fire("onGetRQItemPath");
+    g.one.toolsPanel.getWorkAreaButton.onClick =
+        e.fire("onGetWorkArea");
+    g.two.buttonGroup.performDeleteButton.onClick =
+        e.fire("onPerformDelete");
+    g.two.buttonGroup.helpButton.onClick = e.fire("onHelp");
+
+    g.browsePanel.ISLocation.onChange = e.fire("onISLocationChange");
+
+    //Public methods
+    /** @scope COB.SSD.UI */
+    return {
+        show: function () {
+            if (thePal instanceof Window) {
+                thePal.center();
+                thePal.show();
+            } else {
+                thePal.layout.layout(true);
+            }
+        },                                                            
+        addEventListener: e.addEventListener,
+        removeEventListener: e.removeEventListener,
+        setISLocationsList: setISLocationsList,
+        setISLocation: function (t) {
+            addISLocation(unescape(t));
+        },
+        setISLocationHelpTip: function (t) {
+            g.browsePanel.ISLocation.helpTip = t;
+        },
+        setStartFrame: function (f) {
+            g.one.sectionSelectionPanel.row1.
+                sectionBegin.text = f;
+        },
+        setEndFrame: function (f) {
+            g.one.sectionSelectionPanel.row2.
+                sectionEnd.text = f;
+        },
+        getStartFrame: function () {
+            return g.one.sectionSelectionPanel.row1.sectionBegin.text;
+        },
+        getEndFrame: function () {
+            return g.one.sectionSelectionPanel.row2.sectionEnd.text;
+        },
+        testOnly: function () {
+            return g.two.testOnlyCheckbox.value;
+        },
+        getISLocation: function () {
+            return g.browsePanel.ISLocation.selection.text;
+        },
+        updateISLocation: function (path, filename) {
+            this.setISLocation(path + filename);
+            /*this.setISLocationHelpTip(path);*/
+        },
+        updateLayout: function () {
+            thePal.layout.layout(true);
+        }
+    };
+}());
