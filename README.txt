@@ -1,5 +1,5 @@
-COB Sequence Section Destroyer v1.0.1
-===============
+COB Sequence Section Destroyer v1.1.0
+=====================================
 
 The point of COB_SSD (Sequence Section Destroyer) is to aid in the
 deletion of portions (or all) of a selected image sequence directly from within
